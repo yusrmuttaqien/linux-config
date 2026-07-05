@@ -1,0 +1,8 @@
+[Unit]
+Description=Automated Git Local AI Backup
+After=network-online.target
+
+[Service]
+Type=oneshot
+
+ExecStart=/usr/local/bin/local-ai-backup

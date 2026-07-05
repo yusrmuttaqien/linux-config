@@ -1,0 +1,48 @@
+#!/bin/bash
+
+BACKUP_DIR="/home/yusrmuttaqien/Documents/linux-config"
+TARGETS=(
+   "/home/yusrmuttaqien/.bashrc"
+   "/etc/fstab"
+   "/usr/lib/systemd/system-sleep/sunshine-fix.sh"
+   "/usr/local/bin"
+   "/etc/systemd/system/autosleep.service"
+   "/etc/systemd/system/wol-enable.service"
+   "/etc/systemd/system/zerotier-one.service.d"
+   "/etc/systemd/system/linux-backup.service"
+   "/etc/systemd/system/linux-backup.timer"
+   "/etc/systemd/system/local-ai-backup.service"
+   "/etc/systemd/system/local-ai-backup.timer"
+)
+ 
+# Wipe the backup directory clean (but keep the .git folder)
+# This ensures deleted files on the live system are also removed from the back>
+
+find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+cd /
+
+for target in "${TARGETS[@]}"; do
+    if [ ! -e "$target" ]; then
+        echo "!!! Skipped: '$target' (Not found)"
+        continue
+    fi
+
+    relative_path="${target#/}"
+
+    # -a handles recursion and symlinks, --parents builds the folders
+    cp -a --parents "$relative_path" "$BACKUP_DIR/"
+
+    echo "✅ Copied: $target"
+done
+
+cd "$BACKUP_DIR"
+
+if [ -n "$(git status --porcelain)" ]; then
+    git add .
+    git commit -m "EndavourOS configs backup: $(date)" && \
+    git push origin main && \
+    echo "> Changes pushed to GitHub."
+else
+    echo "> No changes detected today. Nothing to push."
+fi

@@ -1,0 +1,11 @@
+[Unit]
+Description=Runs the Automated Git Local AI Backup daily
+
+[Timer]
+# Runs every day at 2:00 AM
+OnCalendar=*-*-* 02:00:00
+# If the PC is off at 2:00 AM, run it immediately upon next boot
+Persistent=true 
+
+[Install]
+WantedBy=timers.target

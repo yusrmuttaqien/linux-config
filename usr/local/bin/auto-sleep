@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# --- Configuration ---
+CHECK_INTERVAL=60      # Seconds between checks
+IDLE_TIME_LIMIT=1800    # Total seconds of under-threshold usage before sleeping
+GPU_THRESHOLD=2        # GPU usage percentage considered "idle"
+TERMINAL_THRESHOLD=60  # Seconds of terminal inactivity
+# ---------------------
+
+MAX_IDLE_CHECKS=$((IDLE_TIME_LIMIT / CHECK_INTERVAL))
+idle_counter=0
+
+# Function 1: Check terminal activity
+is_terminal_active() {
+    local current_time=$(date +%s)
+    for tty in /dev/pts/* /dev/tty[1-6]; do
+        if [ -c "$tty" ]; then
+            local last_access=$(stat -c %X "$tty" 2>/dev/null)
+            if [ -n "$last_access" ]; then
+                local idle_time=$((current_time - last_access))
+                if [ "$idle_time" -lt "$TERMINAL_THRESHOLD" ]; then
+                    return 0
+                fi
+            fi
+        fi
+    done
+    return 1
+}
+
+# Function 2: Check SMB/NMB file transfers
+is_smb_active() {
+    local lock_count=$(smbstatus -L 2>/dev/null | grep -E -v "Locked files|Pid|---|^$" | wc -l)
+    [ "$lock_count" -gt 0 ] && return 0 || return 1
+}
+
+# --- NEW: Function 3: Check CLI Downloads ---
+is_download_active() {
+    # This checks for aria2c, wget, curl, and rsync. 
+    # You can add or remove process names here as needed.
+    if pgrep -x "aria2c" > /dev/null || \
+       pgrep -x "wget" > /dev/null || \
+       pgrep -x "curl" > /dev/null || \
+       pgrep -x "rsync" > /dev/null; then
+        return 0 # Active
+    fi
+    return 1 # Inactive
+}
+
+echo "Auto-sleep monitor started."
+echo "System will sleep after $IDLE_TIME_LIMIT seconds of total inactivity (GPU, Terminal, SMB, and Downloads)."
+
+while true; do
+    is_active=0
+
+    # 1. Check GPU utilization
+    GPU_USAGE=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | awk '{print $1}')
+    if [ -n "$GPU_USAGE" ] && [ "$GPU_USAGE" -gt "$GPU_THRESHOLD" ]; then
+        is_active=1
+        echo "Activity: GPU usage at ${GPU_USAGE}%"
+    fi
+
+    # 2. Check Terminal Activity
+    if [ "$is_active" -eq 0 ] && is_terminal_active; then
+        is_active=1
+        echo "Activity: Terminal/SSH/Tmux session active"
+    fi
+
+    # 3. Check SMB Transfers
+    if [ "$is_active" -eq 0 ] && is_smb_active; then
+        is_active=1
+        echo "Activity: SMB file transfer in progress"
+    fi
+
+    # 4. Check CLI Downloads (The New Check)
+    if [ "$is_active" -eq 0 ] && is_download_active; then
+        is_active=1
+        echo "Activity: CLI Download (aria2c/wget/rsync) in progress"
+    fi
+
+    # --- Evaluate Idle Status ---
+    if [ "$is_active" -eq 0 ]; then
+        idle_counter=$((idle_counter + 1))
+        echo "System idle. ($idle_counter / $MAX_IDLE_CHECKS)"
+    else
+        idle_counter=0
+    fi
+
+    if [ "$idle_counter" -ge "$MAX_IDLE_CHECKS" ]; then
+        echo "System has been idle for $IDLE_TIME_LIMIT seconds. Suspending..."
+        idle_counter=0
+        
+        echo "Disconnecting active SSH sessions..."
+        pkill -15 -f "sshd-session:" || true
+        sleep 1
+        
+        systemctl suspend
+    fi
+
+    sleep "$CHECK_INTERVAL"
+done

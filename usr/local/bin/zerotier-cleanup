@@ -1,0 +1,47 @@
+#!/bin/bash
+# Script to prioritize NetworkManager profile deletion before kernel link deletion.
+# This prevents NetworkManager from immediately recreating the link/profile.
+
+echo "Starting ZeroTier interface and profile cleanup (Prioritizing NMCLI)..."
+
+# Find all active ZeroTier interface names
+ZT_IFACES=$(ip -o link show | awk -F': ' '{print $2}' | grep '^zt')
+
+# --- 1. Delete NetworkManager Connection Profiles First ---
+for IFACE in $ZT_IFACES
+do
+    # Find the connection UUID associated with this interface, if it exists
+    # Use 'nmcli -t -f UUID,DEVICE connection show' to list all connections and filter by interface name
+    CONN_UUID=$(sudo nmcli -t -f UUID,DEVICE connection show | grep "$IFACE" | awk -F: '{print $1}')
+    
+    if [ -n "$CONN_UUID" ]; then
+        echo "Found profile $CONN_UUID associated with $IFACE. Deleting profile..."
+        # Delete the connection profile from NetworkManager's configuration
+        # This prevents the profile from trying to recreate the link on reboot/restart
+        sudo nmcli connection delete "$CONN_UUID" 2>/dev/null
+    fi
+done
+
+# --- 2. Delete Lingering Kernel Devices ---
+# Now, delete the actual kernel link devices that remain.
+for IFACE in $ZT_IFACES
+do
+    # First, check if the interface still exists after the profile deletion (it might have cleaned itself up)
+    if ip link show "$IFACE" 2>/dev/null; then
+        echo "Interface $IFACE still exists. Deleting link..."
+        
+        # Set the interface down first (best practice)
+        sudo ip link set "$IFACE" down 2>/dev/null
+        
+        # Attempt to delete the link.
+        sudo ip link delete "$IFACE" type dummy 2>/dev/null || sudo ip link delete "$IFACE" 2>/dev/null
+        
+        if [ $? -eq 0 ]; then
+            echo "Successfully deleted kernel link $IFACE."
+        else
+            echo "Failed to delete $IFACE, but continuing."
+        fi
+    fi
+done
+
+echo "ZeroTier cleanup complete."

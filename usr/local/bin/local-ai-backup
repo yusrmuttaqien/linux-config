@@ -1,0 +1,44 @@
+#!/bin/bash
+
+BACKUP_DIR="/home/yusrmuttaqien/Documents/local-ai-config"
+TARGETS=(
+   "/mnt/AI/ocr"
+   "/mnt/AI/workflows"
+   "/home/yusrmuttaqien/Documents/llama.cpp/presets.ini"
+   "/home/yusrmuttaqien/Documents/llama.cpp-turboquant/presets.ini"
+   "/home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/setup_symlink.sh"
+   "/home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/switch_symlink.sh"
+   "/home/yusrmuttaqien/Documents/XnConvert"
+)
+ 
+# Wipe the backup directory clean (but keep the .git folder)
+# This ensures deleted files on the live system are also removed from the back>
+
+find "$BACKUP_DIR" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+cd /
+
+for target in "${TARGETS[@]}"; do
+    if [ ! -e "$target" ]; then
+        echo "!!! Skipped: '$target' (Not found)"
+        continue
+    fi
+
+    relative_path="${target#/}"
+
+    # -a handles recursion and symlinks, --parents builds the folders
+    cp -a --parents "$relative_path" "$BACKUP_DIR/"
+
+    echo "✅ Copied: $target"
+done
+
+cd "$BACKUP_DIR"
+
+if [ -n "$(git status --porcelain)" ]; then
+    git add .
+    git commit -m "Local AI configs backup: $(date)" && \
+    git push origin main && \
+    echo "> Changes pushed to GitHub."
+else
+    echo "> No changes detected today. Nothing to push."
+fi
