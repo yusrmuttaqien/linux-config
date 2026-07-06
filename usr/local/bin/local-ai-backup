@@ -34,6 +34,8 @@ done
 
 cd "$BACKUP_DIR"
 
+ls /home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/ComfyUI/custom_nodes > comfyui-custom-nodes.txt
+
 if [ -n "$(git status --porcelain)" ]; then
     git add .
     git commit -m "Local AI configs backup: $(date)" && \
