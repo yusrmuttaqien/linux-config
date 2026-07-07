@@ -36,6 +36,11 @@ cd "$BACKUP_DIR"
 
 ls /home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/ComfyUI/custom_nodes > comfyui-custom-nodes.txt
 
+ls -R /mnt/AI/models > comfyui-models.txt
+
+sqlite3 /home/yusrmuttaqien/Documents/Open-WebUI/open-webui/webui.db ".backup /home/yusrmuttaqien/Documents/local-ai-config/webui.db" && \
+sqlite3 webui.db "VACUUM;" && \
+
 if [ -n "$(git status --porcelain)" ]; then
     git add .
     git commit -m "Local AI configs backup: $(date)" && \
