@@ -27,8 +27,9 @@ alias logout="loginctl kill-user '$USER'"
 alias reset-sudo="faillock --reset"
 alias reset-samba="sudo systemctl restart smb nmb"
 
-alias gpu-undervolt-higher="sudo nvidia-undervolt.py"
+alias gpu-undervolt-higher="sudo nvidia-undervolt-higher.py"
 alias gpu-undervolt-lower="sudo nvidia-undervolt-lower.py"
+alias gpu-undervolt-gaming="sudo nvidia-undervolt-gaming.py"
 alias gpu-monitor="sudo -v && (( sleep 3 && sudo sh -c 'echo 4 > /sys/class/graphics/fb0/blank' ) & nvtop)"
 
 alias mode-ssh="echo 'Entering SSH Mode: Stopping desktop and sunshine...' && sudo systemctl stop display-manager.service && pkill -u yusrmuttaqien -f 'plasmashell|kwin_wayland|Xwayland|kded6|ksmserver|kscreenlocker|xdg-desktop-portal-kde' && systemctl --user stop app-dev.lizardbyte.app.Sunshine && echo 'Services stopped. VRAM is free. Run nvidia-smi to check.'"

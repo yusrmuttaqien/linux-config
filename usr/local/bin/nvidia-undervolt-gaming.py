@@ -7,7 +7,7 @@ from ctypes import byref
 # GPU UNDERVOLT & OVERCLOCK SETTINGS
 # ==========================================
 # 1. Power Limit (Watts) - The hard safety net
-POWER_LIMIT_WATTS = 100
+POWER_LIMIT_WATTS = 105
 
 # 2. Memory Offset (MHz) - Memory overclock
 MEMORY_OFFSET_MHZ = 2050
@@ -18,7 +18,7 @@ CLOCK_OFFSET_MHZ = 170
 
 # 4. Core Clock Ceiling (MHz) - The "Flattening" of the curve
 # This forces the GPU to stop drawing voltage once it hits this speed.
-MAX_CLOCK_MHZ = 2600
+MAX_CLOCK_MHZ = 2730
 MIN_CLOCK_MHZ = 0
 
 # ==========================================
