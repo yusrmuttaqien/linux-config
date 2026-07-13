@@ -2,7 +2,7 @@
 
 # --- Configuration ---
 # Edit these paths to change your target
-LLAMA_EXECUTABLE="/home/yusrmuttaqien/Documents/llama.cpp-turboquant/main-01-07-2026/build/bin/llama-server"
+LLAMA_EXECUTABLE="/home/yusrmuttaqien/Documents/llama.cpp-turboquant/main-13-07-2026/build/bin/llama-server"
 MODELS_PRESETS="/home/yusrmuttaqien/Documents/llama.cpp-turboquant/presets.ini"
 
 # Edit these env variables to change your config
