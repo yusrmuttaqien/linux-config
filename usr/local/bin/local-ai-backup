@@ -4,7 +4,7 @@ BACKUP_DIR="/home/yusrmuttaqien/Documents/local-ai-config"
 TARGETS=(
    "/mnt/AI/ocr"
    "/mnt/AI/workflows"
-   "/home/yusrmuttaqien/Documents/llama.cpp-turboquant/presets.ini"
+   "/home/yusrmuttaqien/Documents/llama-presets.ini"
    "/home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/setup_symlink.sh"
    "/home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/switch_symlink.sh"
    "/home/yusrmuttaqien/Documents/XnConvert"
