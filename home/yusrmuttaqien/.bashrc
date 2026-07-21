@@ -51,6 +51,8 @@ alias check-space='df -h'
 
 alias current-venv="echo $VIRTUAL_ENV"
 
+alias backup-linux="sudo systemctl start linux-backup.service"
+alias backup-local-ai="sudo systemctl start local-ai-backup.service"
 alias backup-list="restic -r /mnt/HDD\ 1TB/Backup\ repository snapshots"
 alias backup-mount="restic mount ~/mnt/restic-snapshot -r /mnt/HDD\ 1TB/Backup\ repository/"
 
