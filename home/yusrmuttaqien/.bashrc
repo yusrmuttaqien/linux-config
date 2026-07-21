@@ -29,6 +29,7 @@ alias reset-samba="sudo systemctl restart smb nmb"
 
 alias gpu-undervolt-higher="sudo nvidia-undervolt-higher.py"
 alias gpu-undervolt-lower="sudo nvidia-undervolt-lower.py"
+alias gpu-undervolt-lowest="sudo nvidia-undervolt-lowest.py"
 alias gpu-undervolt-gaming="sudo nvidia-undervolt-gaming.py"
 alias gpu-monitor="sudo -v && (( sleep 3 && sudo sh -c 'echo 4 > /sys/class/graphics/fb0/blank' ) & nvtop)"
 

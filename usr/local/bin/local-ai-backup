@@ -8,6 +8,10 @@ TARGETS=(
    "/home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/setup_symlink.sh"
    "/home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/switch_symlink.sh"
    "/home/yusrmuttaqien/Documents/XnConvert"
+   "/home/yusrmuttaqien/.hermes/SOUL.md"
+   "/home/yusrmuttaqien/.hermes/memories"
+   "/home/yusrmuttaqien/.hermes/skills"
+   "/home/yusrmuttaqien/.hermes/sessions"
 )
  
 # Wipe the backup directory clean (but keep the .git folder)
@@ -37,8 +41,13 @@ ls /home/yusrmuttaqien/Documents/ComfyUI/stable-3.12/ComfyUI/custom_nodes > comf
 
 ls -R /mnt/AI/models > comfyui-models.txt
 
-sqlite3 /home/yusrmuttaqien/Documents/Open-WebUI/open-webui/webui.db ".backup /home/yusrmuttaqien/Documents/local-ai-config/webui.db" && \
-sqlite3 webui.db "VACUUM;" && \
+mkdir -p ./home/yusrmuttaqien/Documents/Open-WebUI/open-webui
+
+sqlite3 /home/yusrmuttaqien/Documents/Open-WebUI/open-webui/webui.db ".backup /home/yusrmuttaqien/Documents/local-ai-config/home/yusrmuttaqien/Documents/Open-WebUI/open-webui/webui.db" && \
+sqlite3 ./home/yusrmuttaqien/Documents/Open-WebUI/open-webui/webui.db "VACUUM;" && \
+
+sqlite3 /home/yusrmuttaqien/.hermes/state.db ".backup /home/yusrmuttaqien/Documents/local-ai-config/home/yusrmuttaqien/.hermes/state.db" && \
+sqlite3 ./home/yusrmuttaqien/.hermes/state.db "VACUUM;" && \
 
 if [ -n "$(git status --porcelain)" ]; then
     git add .
